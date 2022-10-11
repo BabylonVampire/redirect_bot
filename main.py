@@ -8,7 +8,7 @@ suggestion = 'предложение'
 redirection = 'перенаправление'
 forward = 'рассылка'
 
-TOKEN = '5797780733:AAFlU1EkmrPkVm2H8-zX9O8fRsC3YpSlaCU'
+TOKEN = '...'
 
 NIKITA_ID = 1
 EGOR_ID = 1
