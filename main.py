@@ -2,35 +2,43 @@ from aiogram import Bot, types
 from aiogram.dispatcher import Dispatcher
 from aiogram.utils import executor
 
+event = 'мероприятие'
+question = 'вопрос'
+suggestion = 'предложение'
+redirection = 'перенаправление'
+forward = 'рассылка'
+
+TOKEN = '5797780733:AAFlU1EkmrPkVm2H8-zX9O8fRsC3YpSlaCU'
+
+NIKITA_ID = 1
+EGOR_ID = 1
+ANYA_ID = 1
+GROUP_ID = 1
+
+ID = {
+    'никита': NIKITA_ID,
+    'егор': EGOR_ID,
+    'аня': ANYA_ID
+}
+
 
 def text_corrector(target, message_text, author):
-    if target == 'мероприятие':
-        text_to_send = f'{author} предложил следующую идею для мероприятия:\n' + message_text
-    elif target == 'вопрос':
-        text_to_send = f'{author} задаёт вопрос:\n' + message_text
-    elif target == 'предложение':
-        text_to_send = f'{author} предлагает следующее:\n' + message_text
-    elif target == 'перенаправление':
-        text_to_send = f'{author} перенаправил вам сообщение:\n' + message_text
+    if target == event:
+        text_to_send = f'{author} предложил следующую идею для мероприятия:\n{message_text}'
+    elif target == question:
+        text_to_send = f'{author} задаёт вопрос:\n{message_text}'
+    elif target == suggestion:
+        text_to_send = f'{author} предлагает следующее:\n{message_text}'
+    elif target == redirection:
+        text_to_send = f'{author} перенаправил вам сообщение:\n{message_text}'
+    elif target == forward:
+        text_to_send = f'{author} поделился:\n{message_text}'
     else:
         return ''
     return text_to_send
 
 
 def main():
-    TOKEN = '...'
-
-    NIKITA_ID = 1
-    EGOR_ID = 1
-    ANYA_ID = 1
-    GROUP_ID = 1
-
-    ID = {
-        'никита': NIKITA_ID,
-        'егор': EGOR_ID,
-        'аня': ANYA_ID
-    }
-
     bot = Bot(TOKEN)
     dp = Dispatcher(bot)
 
@@ -47,23 +55,24 @@ def main():
 
         resend_to = 1
 
-        if target == 'перенаправление':
+        if target == redirection:
             message_text = message.reply_to_message.text
             try:
                 resend_to = ID[message.text.split(' ')[1].lower()]
             except:
                 await message.reply('[!] Убедитесь в правильности введённого адресата')
                 return
-
+        elif target == forward:
+            message_text = message.reply_to_message.text
         else:
             message_text = message_split[1]
 
         target_id = {
-            'мероприятие': NIKITA_ID,
-            'вопрос': NIKITA_ID,
-            'предложение': ANYA_ID,
-            'перенаправление': resend_to,
-            'рассылка': 1
+            event: NIKITA_ID,
+            question: NIKITA_ID,
+            suggestion: ANYA_ID,
+            redirection: resend_to,
+            forward: GROUP_ID
         }
 
         final_text = text_corrector(target, message_text, author)
