@@ -1,3 +1,4 @@
+import aiogram.utils.exceptions
 from aiogram import Bot, types
 from aiogram.dispatcher import Dispatcher
 from aiogram.utils import executor
@@ -21,21 +22,13 @@ ID = {
     'аня': ANYA_ID
 }
 
-
-def text_corrector(target, message_text, author):
-    if target == event:
-        text_to_send = f'{author} предложил следующую идею для мероприятия:\n{message_text}'
-    elif target == question:
-        text_to_send = f'{author} задаёт вопрос:\n{message_text}'
-    elif target == suggestion:
-        text_to_send = f'{author} предлагает следующее:\n{message_text}'
-    elif target == redirection:
-        text_to_send = f'{author} перенаправил вам сообщение:\n{message_text}'
-    elif target == forward:
-        text_to_send = f'{author} поделился:\n{message_text}'
-    else:
-        return ''
-    return text_to_send
+target_id = {
+    event: NIKITA_ID,
+    question: NIKITA_ID,
+    suggestion: ANYA_ID,
+    forward: GROUP_ID,
+    redirection: 1
+}
 
 
 def main():
@@ -60,13 +53,11 @@ def main():
         target = message_split[0].lower()
         author = ' '.join([message.from_user.first_name, message.from_user.last_name])
 
-        resend_to = 1
-
         if target == redirection:
             message_text = message.reply_to_message.text
             try:
-                resend_to = ID[message.text.split(' ')[1].lower()]
-            except:
+                target_id[redirection] = ID[message.text.split(' ')[1].lower()]
+            except KeyError:
                 await message.reply('[!] Убедитесь в правильности введённого адресата')
                 return
         elif target == forward:
@@ -74,21 +65,24 @@ def main():
         else:
             message_text = message_split[1]
 
-        target_id = {
-            event: NIKITA_ID,
-            question: NIKITA_ID,
-            suggestion: ANYA_ID,
-            redirection: resend_to,
-            forward: GROUP_ID
+        text_corrector = {
+            event: f'{author} предложил следующую идею для мероприятия:\n{message_text}',
+            question: f'{author} задаёт вопрос:\n{message_text}',
+            suggestion: f'{author} предлагает следующее:\n{message_text}',
+            redirection: f'{author} перенаправил вам сообщение:\n{message_text}',
+            forward: f'{author} поделился:\n{message_text}'
         }
 
-        final_text = text_corrector(target, message_text, author)
-
-        if not final_text:
+        try:
+            final_text = text_corrector[target]
+        except KeyError:
             await message.reply('[!] Убедитесь в правильности введенного запроса!')
             return
 
-        await bot.send_message(target_id[target], final_text)
+        try:
+            await bot.send_message(target_id[target], final_text)
+        except aiogram.utils.exceptions.ChatNotFound:
+            await message.reply('[!!] ошибка ID пользователя!')
 
     executor.start_polling(dp, skip_updates=1)
 
