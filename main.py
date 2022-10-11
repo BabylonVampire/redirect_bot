@@ -42,6 +42,13 @@ def main():
     bot = Bot(TOKEN)
     dp = Dispatcher(bot)
 
+    @dp.message_handler(commands=['help', 'start'])
+    async def command_help_start(message: types.Message):
+        await message.reply('Привет! Вот, что я могу:\n'
+                            '1) мероприятие;; "текст" - отправка вашего мероприятия на расмотрение\n'
+                            '2) вопрос;; "текст" - отправка вашего вопроса, вы получите ответ, как только замученный учебой человек достанет телефон ;(\n'
+                            '3) предложение;; "текст" - задайте интерессуюший вас вопрос касательно любых волнующих моментов, ответ вы получите, как было указано в пункте выше')
+
     @dp.message_handler()
     async def redirect(message: types.Message):
         message_split = message.text.split(';;')
